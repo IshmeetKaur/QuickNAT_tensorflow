@@ -114,6 +114,5 @@ def quick_nat(X, training, num_classes=3):
 
     ## Classifier Block
     classifier = tf.layers.conv2d(dense_block8, num_classes, (1, 1), activation=None, padding='same')
-    output = tf.nn.softmax(classifier)
-
-    return output  # 512,512,3
+    
+    return classifier  # 512,512,3
