@@ -56,41 +56,31 @@ def train(restore=False, testing=False):
     # train_dataset
     X = tf.placeholder(tf.float32, shape=[None, 192, 192, 1], name="X")
     y = tf.placeholder(tf.float32, shape=[None, 192, 192, 3], name="y")
-
     mode = tf.placeholder(tf.bool, name="mode")
-
     pred1 = quick_nat(X, mode, 3)
-
     tf.add_to_collection("inputs", X)
     tf.add_to_collection("inputs", mode)
     tf.add_to_collection("outputs", pred1)
-
     pred_prob = tf.nn.softmax(pred1, 3)
 
     with tf.name_scope('loss'):
-        # Build loss
         loss_op_1 = weighted_cross_entropy_plus_dice(pred1, y, )
-        # -dice_coef_weighted_(pred1, y)
         loss_op_1 = tf.Print(loss_op_1, [loss_op_1], message="Loss step1: ")
         tf.summary.scalar("Loss", loss_op_1)
 
     with tf.name_scope('loss_background'):
-        # Build loss
         loss_op_back = (-dice_coef_0(pred1, y))
         tf.summary.scalar("Loss background", loss_op_back)
 
     with tf.name_scope('dice_loss_liver'):
-        # Build loss
         loss_rlung = (-dice_coef_1(pred1, y))
         tf.summary.scalar("Loss Rlung", loss_rlung)
 
     with tf.name_scope('dice_loss_spleen'):
-        # Build loss
         loss_llung = (-dice_coef_2(pred1, y))
         tf.summary.scalar("Loss Llung", loss_llung)
 
     with tf.name_scope('SGD'):
-        # Gradient Descent
         train_op_1 = make_train_op(pred1, y, learning, momentum, nestrov, 3)
 
     with tf.name_scope('Accuracy'):
@@ -100,19 +90,16 @@ def train(restore=False, testing=False):
         tf.summary.scalar('Accuracy', acc)
 
     with tf.name_scope('Dice_Coefficient_Background'):
-        # Dice Coefficient
         dice_coef_back = dice_coef_0(pred_prob, y)
         dice_coef_back = tf.Print(dice_coef_back, [dice_coef_back], message="Dice_coef_background: ")
         tf.summary.scalar('Dice Coefficient back', dice_coef_back)
 
     with tf.name_scope('Dice_Coefficient_Liver'):
-        # Accuracy
         dice_coef_liver = dice_coef_1(pred_prob, y)
         dice_coef_liver = tf.Print(dice_coef_liver, [dice_coef_liver], message="Dice_Coefficient_Liver: ")
         tf.summary.scalar('Dice_coef_liver', dice_coef_liver)
 
     with tf.name_scope('Dice_Coefficient_Spleen'):
-        # Accuracy
         dice_coef_spleen = dice_coef_2(pred_prob, y)
         dice_coef_spleen = tf.Print(dice_coef_spleen, [dice_coef_spleen], message="Dice_Coefficient_Spleen: ")
         tf.summary.scalar('Dice_Coefficient_Spleen', dice_coef_spleen)
@@ -166,7 +153,6 @@ def train(restore=False, testing=False):
                 X_batch_op, y_batch_op = data_generator(batch_size, X_train, y_train,num_classes,test_data= True).__next__()
                 print("-----------training---------------")
                 print("epoch ", epoch, " step ", i, "/", step_count_train)
-
                 _, step_loss_1, step_summary, global_step_value = sess.run(
                     [train_op_1, loss_op_1, summary_op, global_step],
                     feed_dict={X: X_batch_op,
@@ -177,7 +163,6 @@ def train(restore=False, testing=False):
                 if (i + 1) % 5 == 0:
                     saver.save(sess, ckdir, global_step=(i + 1))
                     print("Model saved in file: %s" % ckdir)
-
             step_count_valid = int(n_valid / batch_size)
 
             for i in range(step_count_valid):
@@ -192,8 +177,6 @@ def train(restore=False, testing=False):
                                mode: False})
                 test_summary_writer.add_summary(step_summary, (epoch))
 
-
         train_summary_writer.close()
         test_summary_writer.close()
-
 train()
